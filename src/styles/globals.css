@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Ghana design tokens ──────────────────────────────────────────────────── */
+:root {
+  --gh-red:    #CE1126;
+  --gh-gold:   #FCD116;
+  --gh-green:  #006B3F;
+  --gh-black:  #0A0A0A;
+
+  /* Tints */
+  --gh-red-50:   #FEF2F3;
+  --gh-red-100:  #FDDDE0;
+  --gh-green-50: #F0F9F4;
+  --gh-green-100:#D5EEE1;
+  --gh-gold-50:  #FFFBEB;
+  --gh-gold-100: #FEF3C7;
+
+  /* Neutral */
+  --surface:     #FAFAF8;
+  --surface-2:   #F5F5F0;
+  --border:      #E8E8E0;
+  --border-2:    #D4D4C8;
+  --text-muted:  #6B6B60;
+  --text-subtle: #9A9A8E;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    @apply antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-[var(--surface)] text-[var(--gh-black)];
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* Focus ring — accessible, branded */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-[var(--gh-gold)] ring-offset-2;
+  }
+}
+
+/* ── Typography ──────────────────────────────────────────────────────────── */
+@layer base {
+  h1, h2, h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    @apply font-bold tracking-tight;
+  }
+}
+
+/* ── Component utilities ─────────────────────────────────────────────────── */
+@layer components {
+  /* Ghana flag stripe — used in headers */
+  .flag-stripe {
+    @apply flex h-1.5 w-full overflow-hidden rounded-full;
+  }
+  .flag-stripe > :nth-child(1) { @apply flex-1 bg-[var(--gh-red)]; }
+  .flag-stripe > :nth-child(2) { @apply flex-1 bg-[var(--gh-gold)]; }
+  .flag-stripe > :nth-child(3) { @apply flex-1 bg-[var(--gh-green)]; }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl border border-[var(--border)] shadow-sm;
+  }
+  .card-hover {
+    @apply card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .badge-red    { @apply badge bg-[var(--gh-red-100)] text-[var(--gh-red)]; }
+  .badge-green  { @apply badge bg-[var(--gh-green-100)] text-[var(--gh-green)]; }
+  .badge-gold   { @apply badge bg-[var(--gh-gold-100)] text-amber-700; }
+  .badge-gray   { @apply badge bg-[var(--surface-2)] text-[var(--text-muted)]; }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold
+           rounded-xl px-5 py-3 text-sm transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-[var(--gh-red)] text-white hover:bg-red-700 active:scale-95;
+  }
+  .btn-secondary {
+    @apply btn bg-[var(--gh-black)] text-white hover:bg-gray-800 active:scale-95;
+  }
+  .btn-outline {
+    @apply btn border-2 border-[var(--border-2)] text-[var(--gh-black)]
+           hover:border-[var(--gh-black)] active:scale-95;
+  }
+  .btn-ghost {
+    @apply btn text-[var(--text-muted)] hover:text-[var(--gh-black)]
+           hover:bg-[var(--surface-2)] active:scale-95;
+  }
+  .btn-green {
+    @apply btn bg-[var(--gh-green)] text-white hover:bg-green-800 active:scale-95;
+  }
+
+  /* Form inputs */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-[var(--border)]
+           bg-white text-[var(--gh-black)] text-sm
+           placeholder:text-[var(--text-subtle)]
+           focus:border-[var(--gh-red)] focus:outline-none
+           transition-colors duration-150;
+  }
+  .input-error {
+    @apply border-[var(--gh-red)] bg-[var(--gh-red-50)];
+  }
+
+  /* Anonymity level pills */
+  .anon-l1 { @apply badge bg-gray-100 text-gray-600; }
+  .anon-l2 { @apply badge bg-[var(--gh-gold-100)] text-amber-800; }
+  .anon-l3 { @apply badge bg-[var(--gh-green-100)] text-[var(--gh-green)]; }
+
+  /* Status badges for reports */
+  .status-pending    { @apply badge bg-amber-50 text-amber-700; }
+  .status-published  { @apply badge bg-blue-50 text-blue-700; }
+  .status-progress   { @apply badge bg-[var(--gh-gold-100)] text-amber-800; }
+  .status-resolved   { @apply badge bg-[var(--gh-green-100)] text-[var(--gh-green)]; }
+  .status-rejected   { @apply badge bg-[var(--gh-red-100)] text-[var(--gh-red)]; }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply animate-pulse bg-[var(--surface-2)] rounded-lg;
+  }
+
+  /* Mobile-first max width container */
+  .app-container {
+    @apply max-w-[430px] mx-auto min-h-screen;
+  }
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@layer utilities {
+  .animate-slide-up {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
