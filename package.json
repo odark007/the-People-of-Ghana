@@ -14,7 +14,7 @@
     "db:generate-types": "supabase gen types typescript --local > src/types/database.ts",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "prepare": "husky install"
+    "prepare": "node -e \"if(process.env.NODE_ENV !== 'production') require('child_process').execSync('husky install', {stdio: 'inherit'})\""
   },
   "dependencies": {
     "@supabase/ssr": "^0.1.0",
