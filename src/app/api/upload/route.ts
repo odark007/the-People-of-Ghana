@@ -51,7 +51,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Increase body size limit for image uploads
-export const config = {
-  api: { bodyParser: false },
-};
