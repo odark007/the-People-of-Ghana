@@ -4,50 +4,6 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = "--legacy-peer-deps"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# ── Redirect all API routes to SSR function ──────────────────────────────────
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/___netlify-handler"
-  status = 200
-
-# ── SPA fallback for client navigation ───────────────────────────────────────
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin"]}
-
-# ── Security headers (duplicates next.config.js for Netlify CDN edge) ────────
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-# ── Environment variable groups (set values in Netlify dashboard) ─────────────
-# Required env vars — all must be set in Netlify UI → Site → Environment:
-#
-# NEXT_PUBLIC_SUPABASE_URL         → your project URL from Supabase dashboard
-# NEXT_PUBLIC_SUPABASE_ANON_KEY    → public anon key (safe to expose)
-# SUPABASE_SERVICE_ROLE_KEY        → service role key (NEVER expose client-side)
-# SUPABASE_JWT_SECRET              → JWT secret from Supabase dashboard
-#
-# JWT_SECRET                       → custom 256-bit secret for session tokens
-#                                    generate: openssl rand -base64 32
-#
-# OTP_PROVIDER                     → "africastalking" | "twilio"
-# AFRICASTALKING_API_KEY           → Africa's Talking API key
-# AFRICASTALKING_USERNAME          → Africa's Talking username (sandbox = "sandbox")
-# AFRICASTALKING_SENDER_ID         → e.g. "PPLGHANA"
-# TWILIO_ACCOUNT_SID               → (if using Twilio)
-# TWILIO_AUTH_TOKEN                → (if using Twilio)
-# TWILIO_PHONE_NUMBER              → (if using Twilio)
-#
-# NEXT_PUBLIC_APP_URL              → https://your-site.netlify.app
-# NODE_ENV                         → "production"
