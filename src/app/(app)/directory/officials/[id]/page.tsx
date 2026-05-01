@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/client";
 import { OFFICIAL_ROLE_LABELS } from "@/types";
+import type { OfficialRole } from "@/types";
 
 interface Props {
   params: { id: string };
@@ -15,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select("full_name, role")
     .eq("id", params.id)
     .single();
-  return { title: data ? `${data.full_name} — ${OFFICIAL_ROLE_LABELS[data.role]}` : "Official" };
+  return { title: data ? `${data.full_name} — ${OFFICIAL_ROLE_LABELS[data.role as OfficialRole]}` : "Official" };
 }
 
 async function getOfficialWithReports(id: string) {
@@ -62,11 +63,12 @@ export default async function OfficialPage({ params }: Props) {
   if (!official) notFound();
 
   const isVerified = official.verification_status === "verified";
+  const o = official as any;
   const jurisdiction =
-    official.electoral_area?.name ??
-    official.district?.name ??
-    official.constituency?.name ??
-    official.region?.name;
+    o.electoral_area?.name ??
+    o.district?.name ??
+    o.constituency?.name ??
+    o.region?.name;
 
   return (
     <div className="pb-8">
@@ -94,13 +96,13 @@ export default async function OfficialPage({ params }: Props) {
               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                 <span className={`badge text-xs ${STATUS_COLORS[official.verification_status]}`}>
                   {official.verification_status === "verified" ? "✓ Verified" :
-                   official.verification_status === "pending" ? "⏳ Pending" : "❓ Not Verified"}
+                    official.verification_status === "pending" ? "⏳ Pending" : "❓ Not Verified"}
                 </span>
               </div>
 
               <h1 className="font-bold text-lg leading-tight">{official.full_name}</h1>
               <p className="text-ghana-green text-xs font-semibold uppercase tracking-wide mt-0.5">
-                {OFFICIAL_ROLE_LABELS[official.role]}
+                {OFFICIAL_ROLE_LABELS[official.role as OfficialRole]}
               </p>
               <p className="text-[var(--text-muted)] text-sm mt-1">📍 {jurisdiction}</p>
             </div>

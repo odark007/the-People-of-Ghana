@@ -250,7 +250,7 @@ export default function AdminUsersClient() {
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-white border border-[var(--border)]
                                 flex items-center justify-center text-xl">
-                  {ANON_ICONS[selected.anonymity_level]}
+                  {ANON_ICONS[selected.anonymity_level as AnonymityLevel]}
                 </div>
                 <div>
                   <p className="font-bold text-sm">{selected.public_name}</p>

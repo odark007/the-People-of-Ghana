@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { officialsFiltersSchema, createOfficialSchema } from "@/lib/validation";
-import { getSessionFromCookies } from "@/lib/auth";
+import { getAuthUser, getProfile } from "@/lib/auth";
 import { createServerClient, createAdminClient } from "@/lib/supabase/client";
 import { apiError, apiSuccess } from "@/types";
 
@@ -39,10 +39,10 @@ export async function GET(req: NextRequest) {
       )
       .order("full_name");
 
-    if (region_id) query = query.eq("region_id", region_id);
-    if (district_id) query = query.eq("district_id", district_id);
+    if (region_id)         query = query.eq("region_id", region_id);
+    if (district_id)       query = query.eq("district_id", district_id);
     if (electoral_area_id) query = query.eq("electoral_area_id", electoral_area_id);
-    if (role) query = query.eq("role", role);
+    if (role)              query = query.eq("role", role);
     if (verification_status) query = query.eq("verification_status", verification_status);
 
     const { data, count, error } = await query.range(offset, offset + limit - 1);
@@ -57,10 +57,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       apiSuccess({
         officials: data,
-        total: count ?? 0,
+        total:     count ?? 0,
         page,
         limit,
-        pages: Math.ceil((count ?? 0) / limit),
+        pages:     Math.ceil((count ?? 0) / limit),
       }),
       {
         headers: {
@@ -78,15 +78,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   // ── Admin only ──────────────────────────────────────────────────────────
-  const session = await getSessionFromCookies();
-  if (!session || !["admin", "superadmin"].includes(session.role)) {
+  const [user, profile] = await Promise.all([getAuthUser(), getProfile()]);
+
+  if (!user || !profile || !["admin", "superadmin"].includes(profile.role)) {
     return NextResponse.json(
       apiError("FORBIDDEN", "Admin access required"),
       { status: 403 }
     );
   }
 
-  const body = await req.json().catch(() => ({}));
+  const body   = await req.json().catch(() => ({}));
   const parsed = createOfficialSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -98,13 +99,12 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // New officials go into moderation queue
   const { data: official, error } = await supabase
     .from("officials")
     .insert({
       ...parsed.data,
       verification_status: "pending",
-      created_by: session.sub,
+      created_by:          user.id,
     })
     .select("id")
     .single();
@@ -116,10 +116,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Add to moderation queue
   await supabase.from("moderation_queue").insert({
     content_type: "official",
-    content_id: official.id,
+    content_id:   official.id,
   });
 
   return NextResponse.json(apiSuccess({ id: official.id }), { status: 201 });

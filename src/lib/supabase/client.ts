@@ -16,7 +16,8 @@ import { createBrowserClient as createSupabaseBrowserClient } from "@supabase/ss
 import { createServerClient as createSupabaseServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import type { Database } from "@/types/database";
+// Database types placeholder — run `npm run db:generate-types` to generate
+type Database = Record<string, unknown>;
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -30,14 +31,14 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 // ── 1. Browser client (for use in React client components) ───────────────────
 export function createBrowserClient() {
-  return createSupabaseBrowserClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return createSupabaseBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
 // ── 2. Server client (for Server Components and Route Handlers) ───────────────
 export async function createServerClient() {
   const cookieStore = cookies();
 
-  return createSupabaseServerClient<Database>(
+  return createSupabaseServerClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
     {
@@ -72,7 +73,7 @@ export function createAdminClient() {
     );
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

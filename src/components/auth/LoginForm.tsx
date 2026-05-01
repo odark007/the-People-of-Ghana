@@ -179,7 +179,7 @@ export default function LoginForm({ redirectTo, error: initialError }: LoginForm
               focus:border-ghana-gold
               ${fieldErrors.email ? "border-ghana-red bg-red-950/30" : ""}
             `}
-            disabled={step === "loading"}
+            disabled={step !== "form"}
           />
           {fieldErrors.email && (
             <p className="text-red-400 text-xs mt-1">{fieldErrors.email}</p>
@@ -218,7 +218,7 @@ export default function LoginForm({ redirectTo, error: initialError }: LoginForm
                 focus:border-ghana-gold
                 ${fieldErrors.password ? "border-ghana-red bg-red-950/30" : ""}
               `}
-              disabled={step === "loading"}
+              disabled={step !== "form"}
             />
             <button
               type="button"
@@ -240,7 +240,7 @@ export default function LoginForm({ redirectTo, error: initialError }: LoginForm
         {/* Submit */}
         <button
           type="submit"
-          disabled={step === "loading"}
+          disabled={step !== "form"}
           className="btn-primary w-full mt-2 py-4 text-base"
         >
           {mode === "signin" ? "Sign In →" : "Create Account →"}

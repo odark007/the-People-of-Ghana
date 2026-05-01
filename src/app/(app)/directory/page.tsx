@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Find Your Leaders" };
 
 async function getRegions() {
   const supabase = await createServerClient();
-  const { data } = await supabase.from("regions").select("id, name, code").order("name");
+  const { data } = await supabase.from("regions").select("*").order("name");
   return data ?? [];
 }
 
