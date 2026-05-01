@@ -28,6 +28,9 @@
     "react-dom": "^18.2.0",
     "sharp": "^0.33.2",
     "tailwind-merge": "^2.2.1",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -37,15 +40,12 @@
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
     "@vitest/coverage-v8": "^1.2.2",
-    "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.1.0",
     "husky": "^9.0.7",
     "lint-staged": "^15.2.1",
-    "postcss": "^8.4.33",
     "prettier": "^3.2.4",
     "supabase": "^2.95.1",
-    "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "vitest": "^1.2.2"
