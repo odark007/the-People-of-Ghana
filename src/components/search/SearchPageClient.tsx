@@ -2,18 +2,30 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { Search, MapPin, Landmark, Construction, Droplets, Trash2, Zap, HeartPulse, BookOpen, Shield, Leaf } from "lucide-react";
 import { useSearch } from "@/hooks/useSearch";
 import SearchBar from "@/components/ui/SearchBar";
 import { REPORT_CATEGORY_LABELS, OFFICIAL_ROLE_LABELS } from "@/types";
 import type { ReportCategory, OfficialRole } from "@/types";
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  road:"🛣️", water:"💧", sanitation:"🗑️", electricity:"⚡",
-  health:"🏥", education:"📚", security:"🛡️", environment:"🌿", other:"📌",
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  road:        <Construction size={18} strokeWidth={2} />,
+  water:       <Droplets     size={18} strokeWidth={2} />,
+  sanitation:  <Trash2       size={18} strokeWidth={2} />,
+  electricity: <Zap          size={18} strokeWidth={2} />,
+  health:      <HeartPulse   size={18} strokeWidth={2} />,
+  education:   <BookOpen     size={18} strokeWidth={2} />,
+  security:    <Shield       size={18} strokeWidth={2} />,
+  environment: <Leaf         size={18} strokeWidth={2} />,
+  other:       <MapPin       size={18} strokeWidth={2} />,
 };
 
-const AREA_TYPE_ICON: Record<string, string> = {
-  region: "🗺️", district: "📍", municipal: "🏙️", metropolitan: "🌆", electoral_area: "📌",
+const AREA_TYPE_ICON: Record<string, React.ReactNode> = {
+  region:        <MapPin size={18} strokeWidth={2} />,
+  district:      <MapPin size={18} strokeWidth={2} />,
+  municipal:     <MapPin size={18} strokeWidth={2} />,
+  metropolitan:  <MapPin size={18} strokeWidth={2} />,
+  electoral_area:<MapPin size={18} strokeWidth={2} />,
 };
 
 interface SearchPageClientProps {
@@ -23,7 +35,6 @@ interface SearchPageClientProps {
 export default function SearchPageClient({ initialQuery }: SearchPageClientProps) {
   const { query, setQuery, results, status, isLoading, hasResults, isEmpty } = useSearch("all");
 
-  // Seed from URL param
   useEffect(() => {
     if (initialQuery) setQuery(initialQuery);
   }, [initialQuery, setQuery]);
@@ -41,13 +52,13 @@ export default function SearchPageClient({ initialQuery }: SearchPageClientProps
         {/* Idle state */}
         {status === "idle" && (
           <div className="text-center pt-16">
-            <p className="text-5xl mb-4">🔍</p>
+            <Search size={48} className="mx-auto text-[var(--text-subtle)] mb-4" strokeWidth={1.5} />
             <p className="font-bold text-lg">Search People of Ghana</p>
             <p className="text-sm text-[var(--text-muted)] mt-2 leading-relaxed max-w-xs mx-auto">
               Find leaders, community reports, regions, districts, and electoral areas.
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-5">
-              {["Accra", "Kumasi", "Volta", "MP", "Water", "Roads"].map((s) => (
+              {["Accra","Kumasi","Volta","MP","Water","Roads"].map((s) => (
                 <button
                   key={s}
                   onClick={() => setQuery(s)}
@@ -80,7 +91,7 @@ export default function SearchPageClient({ initialQuery }: SearchPageClientProps
         {/* Empty */}
         {isEmpty && (
           <div className="text-center pt-12">
-            <p className="text-4xl mb-3">🤷</p>
+            <Search size={40} className="mx-auto text-[var(--text-subtle)] mb-3" strokeWidth={1.5} />
             <p className="font-bold">No results for "{query}"</p>
             <p className="text-sm text-[var(--text-muted)] mt-1">
               Try different keywords or browse the directory.
@@ -94,13 +105,11 @@ export default function SearchPageClient({ initialQuery }: SearchPageClientProps
         {/* Results */}
         {hasResults && !isLoading && results && (
           <div className="flex flex-col gap-6">
-
-            {/* Summary */}
             <p className="text-xs text-[var(--text-subtle)]">
               <span className="font-bold text-[var(--gh-black)]">{results.total}</span> results for "{query}"
             </p>
 
-            {/* Reports section */}
+            {/* Reports */}
             {results.reports.length > 0 && (
               <section>
                 <h2 className="text-xs font-bold text-[var(--text-subtle)] uppercase tracking-widest mb-3">
@@ -109,8 +118,8 @@ export default function SearchPageClient({ initialQuery }: SearchPageClientProps
                 <div className="flex flex-col gap-2">
                   {results.reports.map((r: any) => (
                     <Link key={r.id} href={`/reports/${r.id}`} className="card-hover flex items-start gap-3 p-4">
-                      <span className="text-2xl flex-shrink-0 mt-0.5">
-                        {CATEGORY_EMOJI[r.category] ?? "📌"}
+                      <span className="w-10 h-10 rounded-xl bg-[var(--surface-2)] flex items-center justify-center flex-shrink-0 text-[var(--text-muted)]">
+                        {CATEGORY_ICONS[r.category] ?? <MapPin size={18} />}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm leading-snug line-clamp-2">{r.title}</p>
@@ -126,7 +135,7 @@ export default function SearchPageClient({ initialQuery }: SearchPageClientProps
               </section>
             )}
 
-            {/* Officials section */}
+            {/* Officials */}
             {results.officials.length > 0 && (
               <section>
                 <h2 className="text-xs font-bold text-[var(--text-subtle)] uppercase tracking-widest mb-3">
@@ -135,18 +144,17 @@ export default function SearchPageClient({ initialQuery }: SearchPageClientProps
                 <div className="flex flex-col gap-2">
                   {results.officials.map((o: any) => (
                     <Link key={o.id} href={`/directory/officials/${o.id}`} className="card-hover flex items-center gap-3 p-4">
-                      <div className="w-11 h-11 rounded-xl bg-ghana-green/10 flex items-center
-                                      justify-center text-xl flex-shrink-0 overflow-hidden border border-[var(--border)]">
+                      <div className="w-11 h-11 rounded-xl bg-ghana-green/10 flex items-center justify-center
+                                      flex-shrink-0 overflow-hidden border border-[var(--border)]">
                         {o.photo_url
                           ? <img src={o.photo_url} alt="" className="w-full h-full object-cover" />
-                          : "👤"}
+                          : <Landmark size={18} className="text-ghana-green" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm truncate">{o.full_name}</p>
                         <p className="text-xs text-[var(--text-subtle)] mt-0.5">
                           {OFFICIAL_ROLE_LABELS[o.role as OfficialRole]}
                           {o.region?.name ? ` · ${o.region.name}` : ""}
-                          {o.verification_status === "verified" ? " ✅" : ""}
                         </p>
                       </div>
                       <span className="text-[var(--text-subtle)] text-sm flex-shrink-0">›</span>
@@ -156,7 +164,7 @@ export default function SearchPageClient({ initialQuery }: SearchPageClientProps
               </section>
             )}
 
-            {/* Areas section */}
+            {/* Areas */}
             {results.areas.length > 0 && (
               <section>
                 <h2 className="text-xs font-bold text-[var(--text-subtle)] uppercase tracking-widest mb-3">
@@ -165,9 +173,8 @@ export default function SearchPageClient({ initialQuery }: SearchPageClientProps
                 <div className="flex flex-col gap-2">
                   {results.areas.map((a: any) => (
                     <Link key={`${a._type}-${a.id}`} href="/directory" className="card-hover flex items-center gap-3 p-4">
-                      <div className="w-11 h-11 rounded-xl bg-ghana-gold/10 flex items-center
-                                      justify-center text-xl flex-shrink-0">
-                        {AREA_TYPE_ICON[a.type ?? a._type] ?? "📍"}
+                      <div className="w-11 h-11 rounded-xl bg-ghana-gold/10 flex items-center justify-center flex-shrink-0">
+                        {AREA_TYPE_ICON[a.type ?? a._type] ?? <MapPin size={18} />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm truncate">{a.name}</p>

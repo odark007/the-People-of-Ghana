@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { getProfile } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import {
+  ClipboardList, Scale, CheckCircle,
+  Users, Landmark, Construction, Droplets,
+  Trash2, Zap, HeartPulse, BookOpen,
+  Shield, Leaf, MapPin,
+} from "lucide-react";
 
 export const metadata: Metadata = { title: "Admin Dashboard" };
 
@@ -19,7 +25,6 @@ async function getStats() {
     supabase.from("officials").select("id", { count: "exact", head: true }).eq("verification_status", "verified"),
     supabase.from("moderation_queue").select("id", { count: "exact", head: true }).eq("status", "pending"),
   ]);
-
   return {
     reports:    { total: totalReports.count ?? 0, pending: pendingReports.count ?? 0, resolved: resolvedReports.count ?? 0 },
     users:      { total: totalUsers.count ?? 0 },
@@ -32,7 +37,7 @@ async function getRecentReports() {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("reports")
-    .select("id, title, category, status, created_at, reporter_public_name, reporter_anonymity_level")
+    .select("id, title, category, status, created_at, reporter_public_name")
     .order("created_at", { ascending: false })
     .limit(5);
   return data ?? [];
@@ -46,9 +51,16 @@ const STATUS_CLASSES: Record<string, string> = {
   rejected:    "status-rejected",
 };
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  road: "🛣️", water: "💧", sanitation: "🗑️", electricity: "⚡",
-  health: "🏥", education: "📚", security: "🛡️", environment: "🌿", other: "📌",
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  road:        <Construction size={16} strokeWidth={2} />,
+  water:       <Droplets     size={16} strokeWidth={2} />,
+  sanitation:  <Trash2       size={16} strokeWidth={2} />,
+  electricity: <Zap          size={16} strokeWidth={2} />,
+  health:      <HeartPulse   size={16} strokeWidth={2} />,
+  education:   <BookOpen     size={16} strokeWidth={2} />,
+  security:    <Shield       size={16} strokeWidth={2} />,
+  environment: <Leaf         size={16} strokeWidth={2} />,
+  other:       <MapPin       size={16} strokeWidth={2} />,
 };
 
 export default async function AdminDashboardPage() {
@@ -56,11 +68,11 @@ export default async function AdminDashboardPage() {
   const [stats, recentReports] = await Promise.all([getStats(), getRecentReports()]);
 
   const STAT_CARDS = [
-    { label: "Total Reports",    value: stats.reports.total,       sub: `${stats.reports.pending} pending`,     icon: "📋", href: "/admin/reports",    color: "border-l-ghana-red"   },
-    { label: "Moderation Queue", value: stats.moderation.pending,  sub: "awaiting review",                      icon: "⚖️", href: "/admin/moderation", color: "border-l-ghana-gold"  },
-    { label: "Resolved Reports", value: stats.reports.resolved,    sub: `of ${stats.reports.total} total`,      icon: "✅", href: "/admin/reports",    color: "border-l-ghana-green" },
-    { label: "Registered Users", value: stats.users.total,         sub: "active accounts",                      icon: "👥", href: "/admin/users",      color: "border-l-blue-400"    },
-    { label: "Officials",        value: stats.officials.total,     sub: `${stats.officials.verified} verified`, icon: "🏛️", href: "/admin/officials",  color: "border-l-purple-400"  },
+    { label: "Total Reports",    value: stats.reports.total,      sub: `${stats.reports.pending} pending`,     icon: <ClipboardList size={22} strokeWidth={1.5} />, href: "/admin/reports",    color: "border-l-ghana-red"   },
+    { label: "Moderation Queue", value: stats.moderation.pending, sub: "awaiting review",                      icon: <Scale         size={22} strokeWidth={1.5} />, href: "/admin/moderation", color: "border-l-ghana-gold"  },
+    { label: "Resolved Reports", value: stats.reports.resolved,   sub: `of ${stats.reports.total} total`,      icon: <CheckCircle   size={22} strokeWidth={1.5} />, href: "/admin/reports",    color: "border-l-ghana-green" },
+    { label: "Registered Users", value: stats.users.total,        sub: "active accounts",                      icon: <Users         size={22} strokeWidth={1.5} />, href: "/admin/users",      color: "border-l-blue-400"    },
+    { label: "Officials",        value: stats.officials.total,    sub: `${stats.officials.verified} verified`,  icon: <Landmark      size={22} strokeWidth={1.5} />, href: "/admin/officials",  color: "border-l-purple-400"  },
   ];
 
   return (
@@ -89,7 +101,7 @@ export default async function AdminDashboardPage() {
             className={`card-hover p-5 border-l-4 ${card.color}`}
           >
             <div className="flex items-start justify-between mb-2">
-              <span className="text-2xl">{card.icon}</span>
+              <span className="text-[var(--text-muted)]">{card.icon}</span>
               {card.label === "Moderation Queue" && stats.moderation.pending > 0 && (
                 <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-ghana-red text-white">
                   {stats.moderation.pending}
@@ -120,17 +132,17 @@ export default async function AdminDashboardPage() {
             recentReports.map((r: any) => (
               <Link
                 key={r.id}
-                href={`/admin/reports`}
+                href="/admin/reports"
                 className="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--surface-2)] transition-colors"
               >
-                <span className="text-lg flex-shrink-0">{CATEGORY_EMOJI[r.category] ?? "📌"}</span>
+                <span className="text-[var(--text-muted)] flex-shrink-0">
+                  {CATEGORY_ICONS[r.category] ?? <MapPin size={16} />}
+                </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate">{r.title}</p>
                   <p className="text-xs text-[var(--text-subtle)]">
                     {r.reporter_public_name} ·{" "}
-                    {new Date(r.created_at).toLocaleDateString("en-GH", {
-                      day: "numeric", month: "short",
-                    })}
+                    {new Date(r.created_at).toLocaleDateString("en-GH", { day: "numeric", month: "short" })}
                   </p>
                 </div>
                 <span className={`badge text-[10px] flex-shrink-0 ${STATUS_CLASSES[r.status]}`}>

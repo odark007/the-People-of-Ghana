@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import {
+  Construction, Droplets, Trash2, Zap, HeartPulse,
+  BookOpen, Shield, Leaf, MapPin, X, CheckCircle, XCircle,
+} from "lucide-react";
 import { REPORT_CATEGORY_LABELS, OFFICIAL_ROLE_LABELS } from "@/types";
 
 interface QueueItem {
@@ -12,34 +16,37 @@ interface QueueItem {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  report: "Report",
-  post: "Post",
-  official: "Official",
+  report: "Report", post: "Post", official: "Official",
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  report: "badge-red",
-  post: "badge-gold",
-  official: "badge-green",
+  report: "badge-red", post: "badge-gold", official: "badge-green",
 };
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  road: "🛣️", water: "💧", sanitation: "🗑️", electricity: "⚡",
-  health: "🏥", education: "📚", security: "🛡️", environment: "🌿", other: "📌",
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  road:        <Construction size={16} strokeWidth={2} />,
+  water:       <Droplets     size={16} strokeWidth={2} />,
+  sanitation:  <Trash2       size={16} strokeWidth={2} />,
+  electricity: <Zap          size={16} strokeWidth={2} />,
+  health:      <HeartPulse   size={16} strokeWidth={2} />,
+  education:   <BookOpen     size={16} strokeWidth={2} />,
+  security:    <Shield       size={16} strokeWidth={2} />,
+  environment: <Leaf         size={16} strokeWidth={2} />,
+  other:       <MapPin       size={16} strokeWidth={2} />,
 };
 
 export default function ModerationQueue() {
-  const [items, setItems] = useState<QueueItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "report" | "post" | "official">("all");
-  const [actionState, setActionState] = useState<Record<string, "approving" | "rejecting" | "done">>({});
+  const [items,       setItems]       = useState<QueueItem[]>([]);
+  const [isLoading,   setIsLoading]   = useState(true);
+  const [filter,      setFilter]      = useState<"all"|"report"|"post"|"official">("all");
+  const [actionState, setActionState] = useState<Record<string, "approving"|"rejecting"|"done">>({});
   const [rejectModal, setRejectModal] = useState<{ id: string } | null>(null);
-  const [rejectNote, setRejectNote] = useState("");
+  const [rejectNote,  setRejectNote]  = useState("");
 
   const loadQueue = useCallback(async () => {
     setIsLoading(true);
     const url = filter === "all" ? "/api/admin/moderation" : `/api/admin/moderation?type=${filter}`;
-    const res = await fetch(url);
+    const res  = await fetch(url);
     const data = await res.json();
     setItems(data.data ?? []);
     setIsLoading(false);
@@ -58,8 +65,7 @@ export default function ModerationQueue() {
     if (!rejectNote.trim()) return;
     setActionState((p) => ({ ...p, [itemId]: "rejecting" }));
     await fetch(`/api/admin/moderation/${itemId}/reject`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ notes: rejectNote }),
     });
     setActionState((p) => ({ ...p, [itemId]: "done" }));
@@ -74,16 +80,12 @@ export default function ModerationQueue() {
     <div className="px-4 pb-8">
       {/* Filter tabs */}
       <div className="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
-        {(["all", "report", "post", "official"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
+        {(["all","report","post","official"] as const).map((f) => (
+          <button key={f} onClick={() => setFilter(f)}
             className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all border
               ${filter === f
                 ? "bg-ghana-black text-ghana-gold border-ghana-black"
-                : "bg-white text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--border-2)]"
-              }`}
-          >
+                : "bg-white text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--border-2)]"}`}>
             {f === "all" ? "All" : TYPE_LABELS[f]}
             {f !== "all" && (
               <span className="ml-1.5 opacity-60">
@@ -96,26 +98,23 @@ export default function ModerationQueue() {
 
       {isLoading ? (
         <div className="flex flex-col gap-3">
-          {[1, 2, 3].map((i) => <div key={i} className="skeleton h-36 rounded-2xl" />)}
+          {[1,2,3].map((i) => <div key={i} className="skeleton h-36 rounded-2xl" />)}
         </div>
       ) : filtered.length === 0 ? (
         <div className="card p-12 text-center mt-4">
-          <p className="text-4xl mb-3">✅</p>
+          <CheckCircle size={40} className="mx-auto text-ghana-green mb-3" strokeWidth={1.5} />
           <p className="font-semibold">Queue is empty</p>
           <p className="text-sm text-[var(--text-muted)] mt-1">Nothing pending moderation.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((item) => {
-            const state = actionState[item.id];
+            const state  = actionState[item.id];
             const isDone = state === "done";
-
             return (
-              <div
-                key={item.id}
-                className={`card overflow-hidden transition-all duration-300 ${isDone ? "opacity-30 scale-95 pointer-events-none" : ""}`}
-              >
-                {/* Item header */}
+              <div key={item.id}
+                className={`card overflow-hidden transition-all duration-300 ${isDone ? "opacity-30 scale-95 pointer-events-none" : ""}`}>
+                {/* Header */}
                 <div className="flex items-center gap-2 px-4 pt-4 pb-2">
                   <span className={`badge text-xs ${TYPE_COLORS[item.content_type]}`}>
                     {TYPE_LABELS[item.content_type]}
@@ -132,15 +131,14 @@ export default function ModerationQueue() {
                   {item.content_type === "report" && (
                     <div className="flex items-start gap-3">
                       {item.preview.image_url && (
-                        <img
-                          src={item.preview.image_url}
-                          alt=""
-                          className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border border-[var(--border)]"
-                        />
+                        <img src={item.preview.image_url} alt=""
+                          className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border border-[var(--border)]" />
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span>{CATEGORY_EMOJI[item.preview.category] ?? "📌"}</span>
+                          <span className="text-[var(--text-muted)]">
+                            {CATEGORY_ICONS[item.preview.category] ?? <MapPin size={14} />}
+                          </span>
                           <span className="text-xs text-[var(--text-muted)]">
                             {REPORT_CATEGORY_LABELS[item.preview.category as keyof typeof REPORT_CATEGORY_LABELS]}
                           </span>
@@ -153,7 +151,6 @@ export default function ModerationQueue() {
                       </div>
                     </div>
                   )}
-
                   {item.content_type === "post" && (
                     <div>
                       <p className="text-sm leading-relaxed line-clamp-3">{item.preview.content}</p>
@@ -163,7 +160,6 @@ export default function ModerationQueue() {
                       </p>
                     </div>
                   )}
-
                   {item.content_type === "official" && (
                     <div>
                       <p className="font-bold text-sm">{item.preview.full_name}</p>
@@ -179,19 +175,20 @@ export default function ModerationQueue() {
                   <button
                     onClick={() => { setRejectModal({ id: item.id }); setRejectNote(""); }}
                     disabled={!!state}
-                    className="flex-1 py-3 text-sm font-semibold text-ghana-red
-                               hover:bg-ghana-red/5 transition-colors border-r border-[var(--border)]
-                               disabled:opacity-40"
-                  >
-                    {state === "rejecting" ? "Rejecting…" : "✕ Reject"}
+                    className="flex-1 py-3 text-sm font-semibold text-ghana-red hover:bg-ghana-red/5
+                               transition-colors border-r border-[var(--border)] disabled:opacity-40
+                               flex items-center justify-center gap-2">
+                    <XCircle size={15} />
+                    {state === "rejecting" ? "Rejecting…" : "Reject"}
                   </button>
                   <button
                     onClick={() => approve(item.id)}
                     disabled={!!state}
-                    className="flex-1 py-3 text-sm font-semibold text-ghana-green
-                               hover:bg-ghana-green/5 transition-colors disabled:opacity-40"
-                  >
-                    {state === "approving" ? "Approving…" : "✓ Approve"}
+                    className="flex-1 py-3 text-sm font-semibold text-ghana-green hover:bg-ghana-green/5
+                               transition-colors disabled:opacity-40
+                               flex items-center justify-center gap-2">
+                    <CheckCircle size={15} />
+                    {state === "approving" ? "Approving…" : "Approve"}
                   </button>
                 </div>
               </div>
@@ -206,8 +203,12 @@ export default function ModerationQueue() {
           onClick={() => setRejectModal(null)}>
           <div className="bg-white w-full max-w-mobile rounded-t-3xl p-6 animate-slide-up"
             onClick={(e) => e.stopPropagation()}>
-            <div className="w-10 h-1 bg-[var(--border)] rounded-full mx-auto mb-5" />
-            <h3 className="font-bold text-lg mb-1">Reject submission</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">Reject submission</h3>
+              <button onClick={() => setRejectModal(null)} className="text-[var(--text-subtle)] hover:text-black">
+                <X size={20} />
+              </button>
+            </div>
             <p className="text-sm text-[var(--text-muted)] mb-4">
               Provide a reason. This is logged but not shown to the user.
             </p>
@@ -215,12 +216,10 @@ export default function ModerationQueue() {
               value={rejectNote}
               onChange={(e) => setRejectNote(e.target.value)}
               placeholder="e.g. Duplicate report, personal attack, insufficient evidence…"
-              className="input min-h-[80px] resize-none mb-4"
-              autoFocus
+              className="input min-h-[80px] resize-none mb-4" autoFocus
             />
             <div className="flex gap-3">
-              <button onClick={() => setRejectModal(null)}
-                className="btn-outline flex-1 py-3">Cancel</button>
+              <button onClick={() => setRejectModal(null)} className="btn-outline flex-1 py-3">Cancel</button>
               <button
                 onClick={() => reject(rejectModal.id)}
                 disabled={!rejectNote.trim()}

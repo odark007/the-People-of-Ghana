@@ -2,25 +2,36 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Search, X, Loader2, MapPin, Landmark } from "lucide-react";
+import {
+  Construction, Droplets, Trash2, Zap, HeartPulse,
+  BookOpen, Shield, Leaf,
+} from "lucide-react";
 import { useSearch } from "@/hooks/useSearch";
 import { REPORT_CATEGORY_LABELS, OFFICIAL_ROLE_LABELS } from "@/types";
 import type { ReportCategory, OfficialRole } from "@/types";
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  road: "🛣️", water: "💧", sanitation: "🗑️", electricity: "⚡",
-  health: "🏥", education: "📚", security: "🛡️", environment: "🌿", other: "📌",
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  road:        <Construction size={15} strokeWidth={2} />,
+  water:       <Droplets     size={15} strokeWidth={2} />,
+  sanitation:  <Trash2       size={15} strokeWidth={2} />,
+  electricity: <Zap          size={15} strokeWidth={2} />,
+  health:      <HeartPulse   size={15} strokeWidth={2} />,
+  education:   <BookOpen     size={15} strokeWidth={2} />,
+  security:    <Shield       size={15} strokeWidth={2} />,
+  environment: <Leaf         size={15} strokeWidth={2} />,
+  other:       <MapPin       size={15} strokeWidth={2} />,
 };
 
 const AREA_TYPE_LABEL: Record<string, string> = {
-  region: "Region",
-  district: "District",
-  municipal: "Municipality",
-  metropolitan: "Metro",
-  electoral_area: "Electoral Area",
+  region:        "Region",
+  district:      "District",
+  municipal:     "Municipality",
+  metropolitan:  "Metro",
+  electoral_area:"Electoral Area",
 };
 
 interface SearchBarProps {
-  /** "hero" = dark background (dashboard), "page" = light background (search page) */
   variant?: "hero" | "page";
   autoFocus?: boolean;
   onResultClick?: () => void;
@@ -31,19 +42,15 @@ export default function SearchBar({
   autoFocus = false,
   onResultClick,
 }: SearchBarProps) {
-  const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const router       = useRouter();
+  const inputRef     = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
   const { query, setQuery, results, status, clear, isLoading, hasResults, isEmpty } = useSearch("all");
 
-  // Open results panel when we have a query
-  useEffect(() => {
-    setOpen(query.trim().length >= 2);
-  }, [query]);
+  useEffect(() => { setOpen(query.trim().length >= 2); }, [query]);
 
-  // Close on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
@@ -52,7 +59,6 @@ export default function SearchBar({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Close on Escape
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") { setOpen(false); inputRef.current?.blur(); }
@@ -82,21 +88,10 @@ export default function SearchBar({
           ? "bg-white/10 border border-white/15 hover:border-white/30 focus-within:border-ghana-gold/60"
           : "bg-white border-2 border-[var(--border)] focus-within:border-ghana-red"}
       `}>
-        {/* Search icon / spinner */}
-        <div className="flex-shrink-0">
-          {isLoading ? (
-            <div className={`w-4 h-4 border-2 rounded-full animate-spin border-t-transparent
-                            ${isHero ? "border-gray-400" : "border-gray-300"}`} />
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke={isHero ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"}
-              strokeWidth="2.5">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
-          )}
-        </div>
-
+        {isLoading
+          ? <Loader2 size={16} className={`flex-shrink-0 animate-spin ${isHero ? "text-gray-400" : "text-gray-300"}`} />
+          : <Search  size={16} className={`flex-shrink-0 ${isHero ? "text-gray-400" : "text-gray-300"}`} />
+        }
         <input
           ref={inputRef}
           type="search"
@@ -105,24 +100,20 @@ export default function SearchBar({
           onFocus={() => query.trim().length >= 2 && setOpen(true)}
           placeholder="Search leaders, reports, areas…"
           autoFocus={autoFocus}
-          className={`
-            flex-1 bg-transparent text-sm outline-none min-w-0
-            ${isHero ? "text-white placeholder:text-gray-500" : "text-[var(--gh-black)] placeholder:text-gray-400"}
-          `}
+          className={`flex-1 bg-transparent text-sm outline-none min-w-0
+            ${isHero ? "text-white placeholder:text-gray-500" : "text-[var(--gh-black)] placeholder:text-gray-400"}`}
           autoComplete="off"
           spellCheck={false}
         />
-
-        {/* Clear button */}
         {query && (
           <button
             type="button"
             onClick={() => { clear(); inputRef.current?.focus(); }}
-            className={`flex-shrink-0 text-sm transition-colors
-                        ${isHero ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"}`}
+            className={`flex-shrink-0 transition-colors
+              ${isHero ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"}`}
             aria-label="Clear search"
           >
-            ✕
+            <X size={16} />
           </button>
         )}
       </div>
@@ -136,7 +127,7 @@ export default function SearchBar({
           {/* Loading skeleton */}
           {isLoading && (
             <div className="p-3 flex flex-col gap-2">
-              {[1, 2, 3].map((i) => (
+              {[1,2,3].map((i) => (
                 <div key={i} className="flex items-center gap-3 p-3">
                   <div className="skeleton w-9 h-9 rounded-xl flex-shrink-0" />
                   <div className="flex-1 flex flex-col gap-1.5">
@@ -151,7 +142,7 @@ export default function SearchBar({
           {/* Empty state */}
           {isEmpty && !isLoading && (
             <div className="p-8 text-center">
-              <p className="text-2xl mb-2">🔍</p>
+              <Search size={32} className="mx-auto text-[var(--text-subtle)] mb-2" strokeWidth={1.5} />
               <p className="font-semibold text-sm">No results for "{query}"</p>
               <p className="text-xs text-[var(--text-subtle)] mt-1">
                 Try a different term or browse the directory
@@ -171,13 +162,10 @@ export default function SearchBar({
                     </span>
                   </div>
                   {results.reports.map((r: any) => (
-                    <button
-                      key={r.id}
-                      onClick={() => navigateTo(`/reports/${r.id}`)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface-2)] transition-colors text-left"
-                    >
-                      <span className="text-xl flex-shrink-0">
-                        {CATEGORY_EMOJI[r.category] ?? "📌"}
+                    <button key={r.id} onClick={() => navigateTo(`/reports/${r.id}`)}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface-2)] transition-colors text-left">
+                      <span className="w-8 h-8 rounded-lg bg-[var(--surface-2)] flex items-center justify-center flex-shrink-0 text-[var(--text-muted)]">
+                        {CATEGORY_ICONS[r.category] ?? <MapPin size={15} />}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate">{r.title}</p>
@@ -200,22 +188,18 @@ export default function SearchBar({
                     </span>
                   </div>
                   {results.officials.map((o: any) => (
-                    <button
-                      key={o.id}
-                      onClick={() => navigateTo(`/directory/officials/${o.id}`)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface-2)] transition-colors text-left"
-                    >
-                      <div className="w-9 h-9 rounded-xl bg-ghana-green/10 flex items-center justify-center text-base flex-shrink-0">
+                    <button key={o.id} onClick={() => navigateTo(`/directory/officials/${o.id}`)}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface-2)] transition-colors text-left">
+                      <div className="w-8 h-8 rounded-lg bg-ghana-green/10 flex items-center justify-center flex-shrink-0 overflow-hidden border border-[var(--border)]">
                         {o.photo_url
-                          ? <img src={o.photo_url} alt="" className="w-full h-full object-cover rounded-xl" />
-                          : "👤"}
+                          ? <img src={o.photo_url} alt="" className="w-full h-full object-cover" />
+                          : <Landmark size={15} className="text-ghana-green" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate">{o.full_name}</p>
                         <p className="text-xs text-[var(--text-subtle)] truncate">
                           {OFFICIAL_ROLE_LABELS[o.role as OfficialRole]} ·{" "}
                           {o.region?.name ?? ""}
-                          {o.verification_status === "verified" ? " ✅" : ""}
                         </p>
                       </div>
                     </button>
@@ -232,13 +216,10 @@ export default function SearchBar({
                     </span>
                   </div>
                   {results.areas.map((a: any) => (
-                    <button
-                      key={`${a._type}-${a.id}`}
-                      onClick={() => navigateTo("/directory")}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface-2)] transition-colors text-left"
-                    >
-                      <div className="w-9 h-9 rounded-xl bg-ghana-gold/15 flex items-center justify-center text-base flex-shrink-0">
-                        📍
+                    <button key={`${a._type}-${a.id}`} onClick={() => navigateTo("/directory")}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface-2)] transition-colors text-left">
+                      <div className="w-8 h-8 rounded-lg bg-ghana-gold/15 flex items-center justify-center flex-shrink-0">
+                        <MapPin size={15} className="text-amber-700" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate">{a.name}</p>
@@ -253,10 +234,8 @@ export default function SearchBar({
 
               {/* View all */}
               <div className="px-4 pt-2 pb-3 border-t border-[var(--border)] mt-2">
-                <button
-                  onClick={() => navigateTo(`/search?q=${encodeURIComponent(query)}`)}
-                  className="text-xs text-ghana-green font-semibold hover:underline"
-                >
+                <button onClick={() => navigateTo(`/search?q=${encodeURIComponent(query)}`)}
+                  className="text-xs text-ghana-green font-semibold hover:underline">
                   View all results for "{query}" →
                 </button>
               </div>

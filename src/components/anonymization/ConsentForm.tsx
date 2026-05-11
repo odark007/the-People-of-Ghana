@@ -2,38 +2,42 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { EyeOff, Shuffle, UserCheck, Lock } from "lucide-react";
 import { ANONYMITY_CONFIGS } from "@/types";
 import type { AnonymityLevel } from "@/types";
 
-const TIER_ICONS: Record<AnonymityLevel, string> = {
-  L1: "🕶️",
-  L2: "🎭",
-  L3: "🙋",
+const TIER_ICONS: Record<AnonymityLevel, React.ReactNode> = {
+  L1: <EyeOff size={22} strokeWidth={2} />,
+  L2: <Shuffle size={22} strokeWidth={2} />,
+  L3: <UserCheck size={22} strokeWidth={2} />,
 };
 
-const TIER_COLORS: Record<AnonymityLevel, { border: string; bg: string; badge: string }> = {
+const TIER_COLORS: Record<AnonymityLevel, { border: string; bg: string; badge: string; icon: string }> = {
   L1: {
     border: "border-gray-600 hover:border-gray-400",
-    bg: "bg-white/5",
-    badge: "bg-gray-700 text-gray-300",
+    bg:     "bg-white/5",
+    badge:  "bg-gray-700 text-gray-300",
+    icon:   "text-gray-300",
   },
   L2: {
     border: "border-yellow-700 hover:border-ghana-gold",
-    bg: "bg-ghana-gold/5",
-    badge: "bg-ghana-gold/20 text-ghana-gold",
+    bg:     "bg-ghana-gold/5",
+    badge:  "bg-ghana-gold/20 text-ghana-gold",
+    icon:   "text-ghana-gold",
   },
   L3: {
     border: "border-green-800 hover:border-ghana-green",
-    bg: "bg-ghana-green/5",
-    badge: "bg-ghana-green/20 text-green-400",
+    bg:     "bg-ghana-green/5",
+    badge:  "bg-ghana-green/20 text-green-400",
+    icon:   "text-green-400",
   },
 };
 
 export default function ConsentForm() {
   const router = useRouter();
-  const [selected, setSelected] = useState<AnonymityLevel | null>(null);
-  const [displayName, setDisplayName] = useState("");
-  const [error, setError] = useState("");
+  const [selected,     setSelected]     = useState<AnonymityLevel | null>(null);
+  const [displayName,  setDisplayName]  = useState("");
+  const [error,        setError]        = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -49,9 +53,9 @@ export default function ConsentForm() {
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/auth/consent", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body:    JSON.stringify({
           anonymity_level: selected,
           ...(selected === "L3" && { display_name: displayName.trim() }),
         }),
@@ -76,8 +80,8 @@ export default function ConsentForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       {/* Tier cards */}
       {(["L1", "L2", "L3"] as AnonymityLevel[]).map((level) => {
-        const config = ANONYMITY_CONFIGS[level];
-        const colors = TIER_COLORS[level];
+        const config     = ANONYMITY_CONFIGS[level];
+        const colors     = TIER_COLORS[level];
         const isSelected = selected === level;
 
         return (
@@ -93,7 +97,8 @@ export default function ConsentForm() {
           >
             {/* Selected indicator */}
             <div className={`
-              absolute top-4 right-4 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
+              absolute top-4 right-4 w-5 h-5 rounded-full border-2 flex items-center
+              justify-center transition-all
               ${isSelected ? "border-white bg-white" : "border-gray-600"}
             `}>
               {isSelected && (
@@ -102,7 +107,9 @@ export default function ConsentForm() {
             </div>
 
             <div className="flex items-start gap-3 pr-8">
-              <span className="text-2xl flex-shrink-0 mt-0.5">{TIER_ICONS[level]}</span>
+              <span className={`flex-shrink-0 mt-0.5 ${colors.icon}`}>
+                {TIER_ICONS[level]}
+              </span>
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-white font-bold text-base">{config.label}</span>
@@ -151,10 +158,13 @@ export default function ConsentForm() {
 
       {/* Privacy note */}
       <div className="mt-1 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
-        <p className="text-xs text-gray-500 leading-relaxed">
-          🔒 Your email is used for login only — never shown publicly.. GPS coordinates are rounded
-          to within ~100m. You can change your privacy level at any time.
-        </p>
+        <div className="flex items-start gap-2">
+          <Lock size={13} className="text-gray-500 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-gray-500 leading-relaxed">
+            Your email is never displayed. GPS coordinates are rounded to within ~100m.
+            You can change your privacy level at any time.
+          </p>
+        </div>
       </div>
 
       {/* Submit */}

@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  LayoutDashboard, Scale, ClipboardList, Landmark,
+  Users, HardDrive, ArrowLeft, LogOut,
+} from "lucide-react";
 import type { UserRole } from "@/types";
 
 interface AdminSidebarProps {
@@ -10,12 +14,12 @@ interface AdminSidebarProps {
 }
 
 const NAV_ITEMS = [
-  { href: "/admin/dashboard",  icon: "📊", label: "Dashboard",  roles: ["admin","superadmin"] },
-  { href: "/admin/moderation", icon: "⚖️", label: "Moderation", roles: ["admin","superadmin"] },
-  { href: "/admin/reports",    icon: "📋", label: "Reports",    roles: ["admin","superadmin"] },
-  { href: "/admin/officials",  icon: "🏛️", label: "Officials",  roles: ["admin","superadmin"] },
-  { href: "/admin/users",      icon: "👥", label: "Users",      roles: ["superadmin"]         },
-  { href: "/admin/storage",    icon: "🗄️", label: "Storage",    roles: ["superadmin"]         },
+  { href: "/admin/dashboard",  icon: <LayoutDashboard size={18} />, label: "Dashboard",  roles: ["admin","superadmin"] },
+  { href: "/admin/moderation", icon: <Scale           size={18} />, label: "Moderation", roles: ["admin","superadmin"] },
+  { href: "/admin/reports",    icon: <ClipboardList   size={18} />, label: "Reports",    roles: ["admin","superadmin"] },
+  { href: "/admin/officials",  icon: <Landmark        size={18} />, label: "Officials",  roles: ["admin","superadmin"] },
+  { href: "/admin/users",      icon: <Users           size={18} />, label: "Users",      roles: ["superadmin"]         },
+  { href: "/admin/storage",    icon: <HardDrive       size={18} />, label: "Storage",    roles: ["superadmin"]         },
 ];
 
 export default function AdminSidebar({ role, publicName }: AdminSidebarProps) {
@@ -70,7 +74,7 @@ export default function AdminSidebar({ role, publicName }: AdminSidebarProps) {
                               ? "bg-white/10 text-white"
                               : "text-gray-400 hover:text-white hover:bg-white/5"}`}
               >
-                <span className="text-base w-5 text-center">{item.icon}</span>
+                {item.icon}
                 {item.label}
               </Link>
             );
@@ -84,7 +88,7 @@ export default function AdminSidebar({ role, publicName }: AdminSidebarProps) {
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                        text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
           >
-            <span className="text-base w-5 text-center">←</span>
+            <ArrowLeft size={18} />
             Back to App
           </Link>
           <button
@@ -93,7 +97,7 @@ export default function AdminSidebar({ role, publicName }: AdminSidebarProps) {
                        text-gray-500 hover:text-ghana-red hover:bg-ghana-red/5
                        transition-colors w-full text-left"
           >
-            <span className="text-base w-5 text-center">🚪</span>
+            <LogOut size={18} />
             Sign Out
           </button>
         </div>
@@ -110,11 +114,9 @@ export default function AdminSidebar({ role, publicName }: AdminSidebarProps) {
               href={item.href}
               className={`flex-shrink-0 flex flex-col items-center gap-0.5 px-3 py-3
                           text-[10px] font-semibold transition-colors
-                          ${isActive
-                            ? "text-ghana-gold"
-                            : "text-gray-500 hover:text-gray-300"}`}
+                          ${isActive ? "text-ghana-gold" : "text-gray-500 hover:text-gray-300"}`}
             >
-              <span className="text-base">{item.icon}</span>
+              {item.icon}
               {item.label}
             </Link>
           );
@@ -124,7 +126,7 @@ export default function AdminSidebar({ role, publicName }: AdminSidebarProps) {
           className="flex-shrink-0 flex flex-col items-center gap-0.5 px-3 py-3
                      text-[10px] font-semibold text-gray-600 hover:text-gray-400 ml-auto"
         >
-          <span className="text-base">←</span>
+          <ArrowLeft size={16} />
           App
         </Link>
       </header>
